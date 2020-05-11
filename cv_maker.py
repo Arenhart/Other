@@ -31,11 +31,42 @@ FONT3i = ("Helvetica-Oblique", 8)
 LEFT_BAR = 5 * cm
 TOP_MARGIN = 1 * cm
 LEFT_BAR_MARGIN = 0.5 * cm
+LANGUAGE = 'en'
 
-with open('cv.json', 'r') as file:
+
+with open('cv_'+LANGUAGE+'.json', 'r', encoding = 'utf-8') as file:
     cv_data = json.load(file)
 	
-#c = canvas.Canvas("cv.pdf", pagesize = A4)
+ST_EN = {
+		'Personal Info' : 'Personal Info',
+		'Skills' : 'Skills',
+		'PDF created using reportlab library': 'PDF created using reportlab library',
+		'Script cv_maker.py availabe at:' : 'Script cv_maker.py available at:',
+		'Education' : 'Education',
+		'Work experience' : 'Work experience',
+		'Research projects': 'Research projects',
+		'Patents and publications' : 'Patents and publications',
+		'Other achievements' : 'Other achievements',
+		'Other' : 'Other'
+		}
+
+ST_PT = {
+		'Personal Info' : 'Dados Pessoais',
+		'Skills' : 'Conhecimentos',
+		'PDF created using reportlab library': 'PDF criado com a biblioteca reportlab',
+		'Script cv_maker.py availabe at:' : 'Script cv_maker.py disponível em:',
+		'Education' : 'Educação',
+		'Work experience' : 'Experiência profissional',
+		'Research projects': 'Projetos de pesquisa',
+		'Patents and publications' : 'Patentes and publicações',
+		'Other achievements' : 'Outras atividades',
+		'Other' : 'Outro'
+		}
+
+if LANGUAGE == 'en':
+	ST = ST_EN
+elif LANGUAGE == 'pt':
+	ST = ST_PT
 
 def firstPage(c, doc):
 	c.saveState()
@@ -51,7 +82,7 @@ def firstPage(c, doc):
 		textobject.textLine(n)
 	textobject.moveCursor(-LEFT_BAR_MARGIN/2, 0)
 	textobject.setFont(*FONT2)
-	textobject.textLine('Personal Info')
+	textobject.textLine(ST['Personal Info'])
 	for n in ('phone', 'email', 'skype', 'linkedin', 'github'):
 		textobject.moveCursor(0, 10)
 		n_cap = n[0].upper() + n[1:]
@@ -61,7 +92,7 @@ def firstPage(c, doc):
 		textobject.textLine(info[n])
 	textobject.moveCursor(0, 20)
 	textobject.setFont(*FONT2)
-	textobject.textLine('Skills')
+	textobject.textLine(ST['Skills'])
 	textobject.setFont(*FONT3)
 	textobject.moveCursor(0, -5)
 	for n in cv_data['skills']:
@@ -70,11 +101,11 @@ def firstPage(c, doc):
 	c.drawText(textobject)
 	
 	textobject = c.beginText()
-	textobject.setTextOrigin(LEFT_BAR_MARGIN, 50)
+	textobject.setTextOrigin(LEFT_BAR_MARGIN/2, 50)
 	textobject.setFont(*FONT3)
 	textobject.setFillColorRGB(*WHITE)
-	textobject.textLine('PDF created using reportlab library')
-	textobject.textLine('Script cv_maker.py availabe at:')
+	textobject.textLine(ST['PDF created using reportlab library'])
+	textobject.textLine(ST['Script cv_maker.py availabe at:'])
 	textobject.textLine('https://github.com/Arenhart/Other')
 	now = date.today()
 	now_str = now.strftime("%d / %m / %Y")
@@ -92,50 +123,51 @@ def laterPages(c, doc):
 	
 
 parsedCV = []
-entry = '<br/><br/><font size=18>' + cv_data['header']['title'] + '</font><br/>'
+entry = '<font size=18>' + cv_data['header']['title'] + '</font><br/>'
 parsedCV.append(entry)
 entry = '<font size=10>' + cv_data['header']['introduction'] + '</font><br/>'
 parsedCV.append(entry)
 
-parsedCV.append( '<br/><br/><font size = 16>Education</font><br/>' )
+parsedCV.append(f'<br/><br/><font size = 16>{ST["Education"]}</font><br/>' )
 cv_data['education'].sort(key = lambda x : int(x['year start']), reverse = True)
 for n in cv_data['education']:
-	entry = n['year start'] + ' - ' + n['year end'] + ':   ' + n['degree'] + ' ' + n['institution'] + '<br/><font size = 8>' + n['conclusion work'] + '</font><br/>'
+	entry = n['year start'] + ' - ' + n['year end'] + ':   ' + n['degree'] + ', ' + n['institution'] + '<br/><font size = 8>' + n['conclusion work'] + '</font><br/>'
 	parsedCV.append( entry )
 	
-parsedCV.append( '<font size = 16>Work experience</font><br/>' )
+parsedCV.append( f'<font size = 16>{ST["Work experience"]}</font><br/>' )
 cv_data['work experience'].sort(key = lambda x : int(x['year start']), reverse = True)
 for n in cv_data['work experience']:
-	entry = n['year start'] + ' - ' + n['year end'] + '   ' + n['role'] + ' at  ' + n['location'] + '<br/><font size = 8>' + n['role'] + '</font><br/>'
+	entry = n['year start'] + ' - ' + n['year end'] + '   ' + n['role'] + ',  ' + n['location'] + '<br/><font size = 7>' + n['description'] + '</font><br/>'
 	parsedCV.append( entry )
 	
-parsedCV.append( '<font size = 16>Research projects</font><br/>' )
+parsedCV.append( f'<font size = 16>{ST["Research projects"]}</font><br/>' )
 cv_data['research projects'].sort(key = lambda x : int(x['year']), reverse = True)
 for n in cv_data['research projects']:
-	entry = n['year'] + '   ' + n['title'] + '<br/><font size = 8>' + n['description'] + '</font><br/>'
+	entry = n['year'] + '   ' + n['title'] + '<br/><font size = 7>' + n['description'] + '</font><br/>'
 	parsedCV.append( entry )
 	
-parsedCV.append( '<font size = 16>Patents and publications</font><br/>' )
+parsedCV.append(f'<font size = 16>{ST["Patents and publications"]}</font><br/>' )
 cv_data['publications'].sort(key = lambda x : int(x['year']), reverse = True)
 for n in cv_data['publications']:
 	entry = n['year'] + '   ' + n['title'] + '<br/>'
 	parsedCV.append( entry )
 	
-parsedCV.append( '<font size = 16>Other achievements</font><br/>' )
+parsedCV.append( f'<font size = 16>{ST["Other achievements"]}</font><br/>' )
 categories = list(set(i['category'] for i in cv_data['other achievements']))
 for cat in categories:
 	subset = [i for i in cv_data['other achievements'] if i['category'] == cat]
 	subset.sort(key = lambda x : int(x['year']), reverse = True)
-	parsedCV.append(cat + '<br/>' )
+	if cat != ST['Other']:
+		parsedCV.append(f'<u>{cat}</u><br/>' )
 	for n in subset:
-		entry = n['year'] + '   ' + n['title'] + '<br/>'
+		entry = '<font size = 10>' + n['year'] + '   ' + n['title'] + '</font><br/>'
 		parsedCV.append( entry )
 
 def go():
-	doc = SimpleDocTemplate('cv.pdf')
+	doc = SimpleDocTemplate(f'cv_{LANGUAGE}.pdf')
 	doc.leftMargin = LEFT_BAR + LEFT_BAR_MARGIN
 	doc.rightMargin = 20
-	doc.topMargin = 0
+	doc.topMargin = 0.5 * cm
 	Story = []
 	style = styles['Normal']
 	style.__dict__['justifyBreaks'] = 0
